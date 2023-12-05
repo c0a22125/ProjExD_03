@@ -175,6 +175,7 @@ def main():
                 # ビームと爆弾衝突時に，どちらのインスタンスも消滅
                 beam = None
                 bomb = None
+                bird.change_img(9, screen)  # 喜んでいるこうかんとんに変更
 
         key_lst = pg.key.get_pressed()
         bird.update(key_lst, screen)
