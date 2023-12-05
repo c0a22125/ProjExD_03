@@ -141,6 +141,20 @@ class Beam:
         screen.blit(self.img, self.rct)
 
 
+class Score:
+    def __init__(self):
+        self.font = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 30)
+        self.color = (0, 0, 255)
+        self.value = 0
+        self.img = self.font.render(f"Score: {self.value}", 0, self.color)
+        self.rect = self.img.get_rect()
+        self.rect.topleft = (100, HEIGHT - 50)
+
+    def update(self, screen):
+        self.img = self.font.render(f"Score: {self.value}", 0, self.color)
+        screen.blit(self.img, self.rect)
+
+
 def main():
     pg.display.set_caption("たたかえ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))    
@@ -149,6 +163,7 @@ def main():
     bombs = [Bomb() for _ in range(NUM_OF_BOMBS)]
     beam = None
     beams = []  # 複数のビームを扱うためのリストを生成
+    score = Score()  # スコアのインスタンスを生成
 
     clock = pg.time.Clock()
     tmr = 0
@@ -175,17 +190,18 @@ def main():
             if not check_bound(beam.rct)[0] or not check_bound(beam.rct)[1]:
                 beams.remove(beam)  # ビームが壁にあたると消滅
             for i, bomb in enumerate(bombs):
-                if beam is not None and beam.rct.colliderect(bomb.rct):
-                    # ビームと爆弾衝突時に，どちらのインスタンスも消滅
-                    bombs[i] = None
+                if beam is not None and beam.rct.colliderect(bomb.rct):  # ビームと爆弾の衝突
+                    bombs[i] = None  # 爆弾を消滅
                     bird.change_img(9, screen)  # 喜んでいるこうかんとんに変更
-                    beams.remove(beam)
+                    beams.remove(beam)  # ビームをリストから削除することでビームを削除
+                    score.value += 1  # 爆弾を打ち落としたらスコアアップ
             bombs = [bomb for bomb in bombs if bomb is not None]
 
         key_lst = pg.key.get_pressed()
         bird.update(key_lst, screen)
         for bomb in bombs:
             bomb.update(screen)
+        score.update(screen)
         pg.display.update()
         tmr += 1
         clock.tick(50)
