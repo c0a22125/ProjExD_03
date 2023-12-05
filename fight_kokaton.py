@@ -55,14 +55,6 @@ class Bird:
             (0, +5): pg.transform.rotozoom(img, -90, 1.0),  # 下
             (+5, +5): pg.transform.rotozoom(img, -45, 1.0),  # 右下
         }
-        # self.img = pg.transform.flip(  # 左右反転
-        #     pg.transform.rotozoom(  # 2倍に拡大
-        #         pg.image.load(f"{MAIN_DIR}/fig/{num}.png"), 
-        #         0, 
-        #         2.0), 
-        #     True, 
-        #     False
-        # )
         self.img = self.imgs[(+5,0)]
         self.rct = self.img.get_rect()
         self.rct.center = xy
@@ -149,7 +141,6 @@ class Beam:
         screen.blit(self.img, self.rct)
 
 
-
 def main():
     pg.display.set_caption("たたかえ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))    
@@ -157,6 +148,7 @@ def main():
     bird = Bird(3, (900, 400))
     bombs = [Bomb() for _ in range(NUM_OF_BOMBS)]
     beam = None
+    beams = []  # 複数のビームを扱うためのリストを生成
 
     clock = pg.time.Clock()
     tmr = 0
@@ -166,6 +158,7 @@ def main():
                 return
             if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:  # スペースキーが押されたら
                 beam = Beam(bird)  # ビームインスタンスを生成
+                beams.append(Beam(bird))  # ビームをリストの中に生成
         
         screen.blit(bg_img, [0, 0])
         
@@ -177,20 +170,22 @@ def main():
                 time.sleep(1)
                 return
             
-        for i, bomb in enumerate(bombs):
-            if beam is not None and beam.rct.colliderect(bomb.rct):
-                # ビームと爆弾衝突時に，どちらのインスタンスも消滅
-                beam = None
-                bombs[i] = None
-                bird.change_img(9, screen)  # 喜んでいるこうかんとんに変更
-        bombs = [bomb for bomb in bombs if bomb is not None]
+        for beam in beams:
+            beam.update(screen)  # ビームを表示
+            if not check_bound(beam.rct)[0] or not check_bound(beam.rct)[1]:
+                beams.remove(beam)  # ビームが壁にあたると消滅
+            for i, bomb in enumerate(bombs):
+                if beam is not None and beam.rct.colliderect(bomb.rct):
+                    # ビームと爆弾衝突時に，どちらのインスタンスも消滅
+                    bombs[i] = None
+                    bird.change_img(9, screen)  # 喜んでいるこうかんとんに変更
+                    beams.remove(beam)
+            bombs = [bomb for bomb in bombs if bomb is not None]
 
         key_lst = pg.key.get_pressed()
         bird.update(key_lst, screen)
         for bomb in bombs:
             bomb.update(screen)
-        if beam is not None:
-            beam.update(screen)
         pg.display.update()
         tmr += 1
         clock.tick(50)
