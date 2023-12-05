@@ -104,7 +104,7 @@ class Bomb:
         ランダムな色，サイズの爆弾円Surfaceを生成する
         """
         color = random.choice(__class__.colors)
-        rad = random.randint(10, 50)
+        rad = random.randint(10, 15)
         self.img = pg.Surface((2*rad, 2*rad))
         pg.draw.circle(self.img, color, (rad, rad), rad)
         self.img.set_colorkey((0, 0, 0))
@@ -129,6 +129,7 @@ class Bomb:
 class Beam:
     """
     ビームに関するクラス
+    引数 ：Birdクラスのインスタンス
     """
     def __init__(self, bird: Bird):
         self.img = pg.image.load(f"{MAIN_DIR}/fig/beam.png")
