@@ -129,7 +129,8 @@ class Beam:
     def __init__(self, bird: Bird):
         self.img = pg.image.load(f"{MAIN_DIR}/fig/beam.png")
         self.rct = self.img.get_rect()
-        self.rct.center = bird.rct.center  # ビームの初期座標をこうかとんの中心座標に設定
+        self.rct.centerx = bird.rct.centerx + bird.rct.width/1.5  # ビームの初期X座標をこうかとんの中心X座標から少し右に設定
+        self.rct.centery = bird.rct.centery  # ビームの初期Y座標をこうかとんの中心Y座標に設定
         self.vx, self.vy = +5, 0
     
     def update(self, screen: pg.Surface):
@@ -161,16 +162,24 @@ def main():
         
         screen.blit(bg_img, [0, 0])
         
-        if bird.rct.colliderect(bomb.rct):
-            # ゲームオーバー時に，こうかとん画像を切り替え，1秒間表示させる
-            bird.change_img(8, screen)
-            pg.display.update()
-            time.sleep(1)
-            return
+        if bomb is not None:
+            if bird.rct.colliderect(bomb.rct):
+                # ゲームオーバー時に，こうかとん画像を切り替え，1秒間表示させる
+                bird.change_img(8, screen)
+                pg.display.update()
+                time.sleep(1)
+                return
+            
+        if beam is not None and bomb is not None:
+            if beam.rct.colliderect(bomb.rct):
+                # ビームと爆弾衝突時に，どちらのインスタンスも消滅
+                beam = None
+                bomb = None
 
         key_lst = pg.key.get_pressed()
         bird.update(key_lst, screen)
-        bomb.update(screen)
+        if bomb is not None:
+            bomb.update(screen)
         if beam is not None:
             beam.update(screen)
         pg.display.update()
